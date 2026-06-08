@@ -1,0 +1,252 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>교토식 화법 AI Ultimate+</title>
+<style>
+body{
+margin:0;
+font-family:sans-serif;
+background:#f6eee4;
+color:#2d2d2d;
+}
+.container{
+max-width:1000px;
+margin:auto;
+padding:30px;
+}
+.card{
+background:white;
+padding:30px;
+border-radius:24px;
+box-shadow:0 10px 30px rgba(0,0,0,0.08);
+}
+textarea{
+width:100%;
+height:180px;
+padding:18px;
+border:none;
+border-radius:16px;
+background:#faf5ef;
+font-size:16px;
+}
+.controls{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+margin-top:20px;
+}
+button,select{
+padding:12px;
+border:none;
+border-radius:12px;
+font-size:15px;
+}
+button{
+cursor:pointer;
+}
+.result{
+margin-top:25px;
+background:#fff8ef;
+padding:20px;
+border-left:6px solid #7a4c2e;
+border-radius:16px;
+line-height:1.8;
+white-space:pre-wrap;
+min-height:100px;
+}
+.history-item{
+background:#f7f1ea;
+padding:12px;
+border-radius:12px;
+margin-top:10px;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+<div class="card">
+
+<h1>🎐 교토식 화법 AI Ultimate+</h1>
+
+<textarea id="inputText" placeholder="예: 너 오늘 진짜 시끄럽다"></textarea>
+
+<div class="controls">
+
+<select id="mode">
+<option value="soft">부드러운</option>
+<option value="dark">무서운</option>
+<option value="royal">귀족풍</option>
+<option value="cute">귀여운</option>
+<option value="anime">애니 감성</option>
+<option value="tsundere">츤데레</option>
+</select>
+
+<select id="intensity">
+<option value="light">약함</option>
+<option value="normal">보통</option>
+<option value="extreme">살벌함</option>
+</select>
+
+<button onclick="generate()">변환하기</button>
+<button onclick="copyResult()">복사</button>
+<button onclick="randomInput()">랜덤 예시</button>
+
+</div>
+
+<div class="result" id="output">
+여기에 결과가 표시됩니다.
+</div>
+
+<h3>최근 기록</h3>
+<div id="historyBox"></div>
+
+</div>
+</div>
+
+<script>
+
+const responses = {
+noise:[
+"오늘은 정말 활기차네~",
+"덕분에 존재감이 확실하구나.",
+"조용할 틈이 없어서 즐겁네.",
+"모두가 네 에너지를 느끼겠네."
+],
+late:[
+"시간에 얽매이지 않는 타입이네~",
+"등장 타이밍까지 개성이 있구나.",
+"다들 기다리는 동안 여유를 배웠겠네."
+],
+stupid:[
+"앞으로 성장 가능성이 아주 많겠네~",
+"정답에 얽매이지 않는 사고방식이구나.",
+"참 독창적인 방식이네."
+],
+ugly:[
+"정말 인상 깊은 분위기를 가지고 있네.",
+"쉽게 잊히진 않겠네.",
+"개성이 굉장히 강하구나."
+],
+generic:[
+"그렇게 생각할 수도 있겠네~",
+"참 재미있는 의견이네.",
+"오래 기억에 남을 것 같아."
+]
+};
+
+const examples = [
+"너 오늘 너무 시끄럽다",
+"너 눈치 진짜 없네",
+"오늘 왜 이렇게 늦었어?",
+"공부 못하네",
+"그 옷 독특하다"
+];
+
+function pick(arr){
+return arr[Math.floor(Math.random()*arr.length)];
+}
+
+function detect(text){
+
+if(text.includes("시끄") || text.includes("떠들")){
+return "noise";
+}
+
+if(text.includes("늦") || text.includes("지각")){
+return "late";
+}
+
+if(text.includes("못하") || text.includes("멍청")){
+return "stupid";
+}
+
+if(text.includes("못생") || text.includes("별로")){
+return "ugly";
+}
+
+return "generic";
+}
+
+function styleText(text,mode,intensity){
+
+if(mode==="tsundere"){
+return text + "\n흥, 딱히 신경 쓰는 건 아니거든?";
+}
+
+if(mode==="anime"){
+return text + "\n왠지 애니 엔딩 장면 같네.";
+}
+
+if(mode==="cute"){
+return text + "\n귀엽게 들리네~";
+}
+
+if(mode==="royal"){
+return "참 우아하구나.\n" + text;
+}
+
+if(mode==="dark"){
+if(intensity==="extreme"){
+return text + "\n그 용기만큼은 인정해야겠네.";
+}
+return text + "\n정말 기억에 남겠네.";
+}
+
+return text;
+}
+
+function generate(){
+
+const input=document.getElementById("inputText").value.trim();
+
+if(!input){
+document.getElementById("output").innerText="먼저 문장을 입력해주세요.";
+return;
+}
+
+const category=detect(input);
+
+let result=pick(responses[category]);
+
+const mode=document.getElementById("mode").value;
+const intensity=document.getElementById("intensity").value;
+
+result=styleText(result,mode,intensity);
+
+if(Math.random() > 0.5){
+result += "\n\n🍵 속뜻: 눈치채라는 의미일 수도 있어.";
+}
+
+document.getElementById("output").innerText=result;
+
+saveHistory(input,result);
+}
+
+function saveHistory(input,result){
+
+const div=document.createElement("div");
+div.className="history-item";
+
+div.innerHTML="<strong>입력:</strong> "+input+"<br><strong>결과:</strong><br>"+result.replace(/\n/g,"<br>");
+
+document.getElementById("historyBox").prepend(div);
+}
+
+function copyResult(){
+navigator.clipboard.writeText(document.getElementById("output").innerText);
+alert("복사되었습니다!");
+}
+
+function randomInput(){
+const r=pick(examples);
+document.getElementById("inputText").value=r;
+}
+
+</script>
+
+</body>
+</html>
