@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>교토식 화법 변환기 Pro</title>
+
+<style>
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    background:linear-gradient(135deg,#f7efe2,#efe3d2);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    color:#2d2d2d;
+}
+
+.container{
+    max-width:900px;
+    margin:auto;
+    padding:30px;
+}
+
+.card{
+    background:white;
+    border-radius:24px;
+    padding:30px;
+    box-shadow:0 10px 35px rgba(0,0,0,0.08);
+}
+
+h1{
+    margin-top:0;
+    color:#7c4d2f;
+}
+
+.subtitle{
+    color:#666;
+    margin-bottom:25px;
+}
+
+textarea{
+    width:100%;
+    height:160px;
+    border:none;
+    border-radius:16px;
+    padding:18px;
+    font-size:17px;
+    background:#faf6f1;
+    outline:none;
+    resize:vertical;
+}
+
+.options{
+    margin-top:18px;
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+}
+
+select{
+    padding:12px;
+    border-radius:12px;
+    border:none;
+    background:#f1e7db;
+    font-size:15px;
+}
+
+button{
+    border:none;
+    border-radius:14px;
+    padding:14px 18px;
+    font-size:15px;
+    cursor:pointer;
+    transition:0.2s;
+}
+
+.main-btn{
+    background:#7c4d2f;
+    color:white;
+}
+
+.copy-btn{
+    background:#d9b38c;
+    color:white;
+}
+
+.random-btn{
+    background:#a47a5b;
+    color:white;
+}
+
+button:hover{
+    transform:translateY(-2px);
+}
+
+.result{
+    margin-top:25px;
+    background:#fff8ef;
+    border-left:7px solid #7c4d2f;
+    padding:22px;
+    border-radius:18px;
+    line-height:1.8;
+    min-height:80px;
+    white-space:pre-wrap;
+    font-size:17px;
+}
+
+.counter{
+    margin-top:10px;
+    color:#777;
+    font-size:14px;
+}
+
+.history{
+    margin-top:30px;
+}
+
+.history-item{
+    background:#f8f3ee;
+    padding:14px;
+    border-radius:12px;
+    margin-bottom:10px;
+}
+
+.footer{
+    text-align:center;
+    margin-top:25px;
+    color:#777;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<div class="card">
+
+<h1>🎐 교토식 화법 변환기 Pro</h1>
+<p class="subtitle">
+입력한 말을 돌려 말하는 교토식 화법으로 변환합니다.
+</p>
+
+<textarea id="inputText" placeholder="예: 너 오늘 너무 시끄러워"></textarea>
+
+<div class="counter">
+글자 수: <span id="charCount">0</span>
+</div>
+
+<div class="options">
+<select id="mode">
+<option value="soft">부드러운 교토식</option>
+<option value="dark">은근히 무서운 교토식</option>
+<option value="royal">귀족 느낌 교토식</option>
+<option value="cute">귀여운 교토식</option>
+</select>
+
+<button class="main-btn" onclick="convertText()">변환하기</button>
+<button class="copy-btn" onclick="copyResult()">결과 복사</button>
+<button class="random-btn" onclick="randomExample()">랜덤 예시</button>
+</div>
+
+<div class="result" id="outputText">
+여기에 결과가 표시됩니다.
+</div>
+
+<div class="history">
+<h3>최근 변환 기록</h3>
+<div id="historyBox"></div>
+</div>
+
+<div class="footer">
+교토의 미소 뒤에 숨겨진 진심을 체험해보세요.
+</div>
+
+</div>
+</div>
+
+<script>
+
+const examples = [
+"너 오늘 너무 시끄럽다",
+"공부 진짜 못하네",
+"오늘 왜 이렇게 늦었어?",
+"그 옷 정말 독특하다",
+"집에 좀 가라",
+"너 진짜 귀찮게 한다"
+];
+
+const patterns = [
+{
+keywords:["시끄럽","떠들","소란"],
+soft:"오늘은 굉장히 활기차네~",
+dark:"이렇게까지 존재감이 강할 줄은 몰랐네.",
+royal:"오늘 분위기를 아주 화려하게 만들어주는구나.",
+cute:"우와~ 정말 에너지가 넘치네!"
+},
+{
+keywords:["못하","못해","실력"],
+soft:"앞으로 성장할 가능성이 아주 많겠네~",
+dark:"결과보다 과정에 의미를 두는 타입인가 봐.",
+royal:"참 독창적인 방식으로 해내는구나.",
+cute:"조금만 더 하면 분명 잘할 수 있을 거야!"
+},
+{
+keywords:["늦었","지각"],
+soft:"시간에 크게 얽매이지 않는 타입이구나~",
+dark:"다들 기다리는 동안 여유가 있었겠네.",
+royal:"등장 타이밍까지 우아하구나.",
+cute:"천천히 와도 괜찮아~"
+},
+{
+keywords:["귀찮"],
+soft:"오늘은 여유를 중요하게 생각하는 날이네~",
+dark:"의욕이라는 게 꼭 항상 필요한 건 아니지.",
+royal:"마음의 평온을 추구하는구나.",
+cute:"쉬고 싶은 날도 있는 거지!"
+},
+{
+keywords:["별로","못생"],
+soft:"개성이 아주 뚜렷하시네~",
+dark:"쉽게 잊히진 않겠네.",
+royal:"참 인상 깊은 분위기를 가지고 있구나.",
+cute:"엄청 특별한 느낌이야!"
+}
+];
+
+const endings = {
+soft:[
+"참 독특한 생각이네~",
+"그렇게 느낄 수도 있겠네~",
+"아주 솔직해서 좋네~"
+],
+dark:[
+"듣고 나니 오래 기억에 남을 것 같네.",
+"여러 의미로 인상적이야.",
+"굉장히 강렬한 의견이네."
+],
+royal:[
+"우아한 개성이 느껴지는구나.",
+"참으로 품격 있는 발상이야.",
+"귀족다운 감각이네."
+],
+cute:[
+"왠지 귀엽게 들리네!",
+"재미있는 생각이야~",
+"그런 말도 좋네!"
+]
+};
+
+const inputText = document.getElementById("inputText");
+const outputText = document.getElementById("outputText");
+const historyBox = document.getElementById("historyBox");
+const charCount = document.getElementById("charCount");
+
+inputText.addEventListener("input", ()=>{
+    charCount.innerText = inputText.value.length;
+});
+
+function convertText(){
+
+    const text = inputText.value.trim();
+
+    if(!text){
+        outputText.innerText = "먼저 문장을 입력해주세요.";
+        return;
+    }
+
+    const mode = document.getElementById("mode").value;
+
+    let result = "";
+
+    for(const p of patterns){
+        for(const keyword of p.keywords){
+            if(text.includes(keyword)){
+                result = p[mode];
+            }
+        }
+    }
+
+    if(result === ""){
+        const randomEnding = endings[mode][Math.floor(Math.random()*endings[mode].length)];
+        result = `"${text}"라니… ${randomEnding}`;
+    }
+
+    outputText.innerText = result;
+
+    addHistory(text,result);
+}
+
+function copyResult(){
+    navigator.clipboard.writeText(outputText.innerText);
+    alert("결과가 복사되었습니다!");
+}
+
+function randomExample(){
+    const random = examples[Math.floor(Math.random()*examples.length)];
+    inputText.value = random;
+    charCount.innerText = random.length;
+}
+
+function addHistory(input,result){
+
+    const div = document.createElement("div");
+    div.className = "history-item";
+
+    div.innerHTML = `
+    <strong>입력:</strong> ${input}<br>
+    <strong>결과:</strong> ${result}
+    `;
+
+    historyBox.prepend(div);
+
+    if(historyBox.children.length > 5){
+        historyBox.removeChild(historyBox.lastChild);
+    }
+}
+
+</script>
+
+</body>
+</html>
